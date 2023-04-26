@@ -4,42 +4,33 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Jetstream\Features;
+use Laravel\Jetstream\Http\Livewire\UpdateProfileInformationForm;
+use Livewire\Livewire;
 use Tests\TestCase;
 
-class PasswordConfirmationTest extends TestCase
+class ProfileInformationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_confirm_password_screen_can_be_rendered()
+    public function test_current_profile_information_is_available()
     {
-        $user = User::factory()->withPersonalTeam()->create();
+        $this->actingAs($user = User::factory()->create());
 
-        $response = $this->actingAs($user)->get('/user/confirm-password');
+        $component = Livewire::test(UpdateProfileInformationForm::class);
 
-        $response->assertStatus(200);
+        $this->assertEquals($user->name, $component->state['name']);
+        $this->assertEquals($user->email, $component->state['email']);
     }
 
-    public function test_password_can_be_confirmed()
+    public function test_profile_information_can_be_updated()
     {
-        $user = User::factory()->create();
+        $this->actingAs($user = User::factory()->create());
 
-        $response = $this->actingAs($user)->post('/user/confirm-password', [
-            'password' => 'password',
-        ]);
+        Livewire::test(UpdateProfileInformationForm::class)
+                ->set('state', ['name' => 'Test Name', 'email' => 'test@example.com'])
+                ->call('updateProfileInformation');
 
-        $response->assertRedirect();
-        $response->assertSessionHasNoErrors();
-    }
-
-    public function test_password_is_not_confirmed_with_invalid_password()
-    {
-        $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->post('/user/confirm-password', [
-            'password' => 'wrong-password',
-        ]);
-
-        $response->assertSessionHasErrors();
+        $this->assertEquals('Test Name', $user->fresh()->name);
+        $this->assertEquals('test@example.com', $user->fresh()->email);
     }
 }

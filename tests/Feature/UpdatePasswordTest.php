@@ -2,53 +2,61 @@
 
 namespace Tests\Feature;
 
-use App\Providers\RouteServiceProvider;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Fortify\Features;
-use Laravel\Jetstream\Jetstream;
+use Illuminate\Support\Facades\Hash;
+use Laravel\Jetstream\Http\Livewire\UpdatePasswordForm;
+use Livewire\Livewire;
 use Tests\TestCase;
 
-class RegistrationTest extends TestCase
+class UpdatePasswordTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_registration_screen_can_be_rendered()
+    public function test_password_can_be_updated()
     {
-        if (! Features::enabled(Features::registration())) {
-            return $this->markTestSkipped('Registration support is not enabled.');
-        }
+        $this->actingAs($user = User::factory()->create());
 
-        $response = $this->get('/register');
+        Livewire::test(UpdatePasswordForm::class)
+                ->set('state', [
+                    'current_password' => 'password',
+                    'password' => 'new-password',
+                    'password_confirmation' => 'new-password',
+                ])
+                ->call('updatePassword');
 
-        $response->assertStatus(200);
+        $this->assertTrue(Hash::check('new-password', $user->fresh()->password));
     }
 
-    public function test_registration_screen_cannot_be_rendered_if_support_is_disabled()
+    public function test_current_password_must_be_correct()
     {
-        if (Features::enabled(Features::registration())) {
-            return $this->markTestSkipped('Registration support is enabled.');
-        }
+        $this->actingAs($user = User::factory()->create());
 
-        $response = $this->get('/register');
+        Livewire::test(UpdatePasswordForm::class)
+                ->set('state', [
+                    'current_password' => 'wrong-password',
+                    'password' => 'new-password',
+                    'password_confirmation' => 'new-password',
+                ])
+                ->call('updatePassword')
+                ->assertHasErrors(['current_password']);
 
-        $response->assertStatus(404);
+        $this->assertTrue(Hash::check('password', $user->fresh()->password));
     }
 
-    public function test_new_users_can_register()
+    public function test_new_passwords_must_match()
     {
-        if (! Features::enabled(Features::registration())) {
-            return $this->markTestSkipped('Registration support is not enabled.');
-        }
+        $this->actingAs($user = User::factory()->create());
 
-        $response = $this->post('/register', [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
-            'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature(),
-        ]);
+        Livewire::test(UpdatePasswordForm::class)
+                ->set('state', [
+                    'current_password' => 'password',
+                    'password' => 'new-password',
+                    'password_confirmation' => 'wrong-password',
+                ])
+                ->call('updatePassword')
+                ->assertHasErrors(['password']);
 
-        $this->assertAuthenticated();
-        $response->assertRedirect(RouteServiceProvider::HOME);
+        $this->assertTrue(Hash::check('password', $user->fresh()->password));
     }
 }

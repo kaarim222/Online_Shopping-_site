@@ -1,22 +1,13 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<x-guest-layout>
+    <div class="pt-4 bg-gray-100">
+        <div class="min-h-screen flex flex-col items-center pt-6 sm:pt-0">
+            <div>
+                <x-jet-authentication-card-logo />
+            </div>
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
-
-        <!-- Fonts -->
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
-
-        <!-- Scripts -->
-        <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-<script src="{{ asset('js/app.js') }}" defer></script>
-    </head>
-    <body>
-        <div class="font-sans text-gray-900 antialiased">
-            {{ $slot }}
+            <div class="w-full sm:max-w-2xl mt-6 p-6 bg-white shadow-md overflow-hidden sm:rounded-lg prose">
+                {!! $policy !!}
+            </div>
         </div>
-    </body>
-</html>
+    </div>
+</x-guest-layout>

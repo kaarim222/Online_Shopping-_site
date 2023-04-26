@@ -3,44 +3,71 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Providers\RouteServiceProvider;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Jetstream\Features;
-use Laravel\Jetstream\Http\Livewire\DeleteUserForm;
-use Livewire\Livewire;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\URL;
+use Laravel\Fortify\Features;
 use Tests\TestCase;
 
-class DeleteAccountTest extends TestCase
+class EmailVerificationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_user_accounts_can_be_deleted()
+    public function test_email_verification_screen_can_be_rendered()
     {
-        if (! Features::hasAccountDeletionFeatures()) {
-            return $this->markTestSkipped('Account deletion is not enabled.');
+        if (! Features::enabled(Features::emailVerification())) {
+            return $this->markTestSkipped('Email verification not enabled.');
         }
 
-        $this->actingAs($user = User::factory()->create());
+        $user = User::factory()->withPersonalTeam()->unverified()->create();
 
-        $component = Livewire::test(DeleteUserForm::class)
-                        ->set('password', 'password')
-                        ->call('deleteUser');
+        $response = $this->actingAs($user)->get('/email/verify');
 
-        $this->assertNull($user->fresh());
+        $response->assertStatus(200);
     }
 
-    public function test_correct_password_must_be_provided_before_account_can_be_deleted()
+    public function test_email_can_be_verified()
     {
-        if (! Features::hasAccountDeletionFeatures()) {
-            return $this->markTestSkipped('Account deletion is not enabled.');
+        if (! Features::enabled(Features::emailVerification())) {
+            return $this->markTestSkipped('Email verification not enabled.');
         }
 
-        $this->actingAs($user = User::factory()->create());
+        Event::fake();
 
-        Livewire::test(DeleteUserForm::class)
-                        ->set('password', 'wrong-password')
-                        ->call('deleteUser')
-                        ->assertHasErrors(['password']);
+        $user = User::factory()->unverified()->create();
 
-        $this->assertNotNull($user->fresh());
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $user->id, 'hash' => sha1($user->email)]
+        );
+
+        $response = $this->actingAs($user)->get($verificationUrl);
+
+        Event::assertDispatched(Verified::class);
+
+        $this->assertTrue($user->fresh()->hasVerifiedEmail());
+        $response->assertRedirect(RouteServiceProvider::HOME.'?verified=1');
+    }
+
+    public function test_email_can_not_verified_with_invalid_hash()
+    {
+        if (! Features::enabled(Features::emailVerification())) {
+            return $this->markTestSkipped('Email verification not enabled.');
+        }
+
+        $user = User::factory()->unverified()->create();
+
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $user->id, 'hash' => sha1('wrong-email')]
+        );
+
+        $this->actingAs($user)->get($verificationUrl);
+
+        $this->assertFalse($user->fresh()->hasVerifiedEmail());
     }
 }

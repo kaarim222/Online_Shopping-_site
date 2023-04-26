@@ -1,21 +1,22 @@
-const defaultTheme = require('tailwindcss/defaultTheme');
+<?php
 
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-    content: [
-        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
-        './vendor/laravel/jetstream/**/*.blade.php',
-        './storage/framework/views/*.php',
-        './resources/views/**/*.blade.php',
-    ],
+namespace Tests;
 
-    theme: {
-        extend: {
-            fontFamily: {
-                sans: ['Nunito', ...defaultTheme.fontFamily.sans],
-            },
-        },
-    },
+use Illuminate\Contracts\Console\Kernel;
 
-    plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography')],
-};
+trait CreatesApplication
+{
+    /**
+     * Creates the application.
+     *
+     * @return \Illuminate\Foundation\Application
+     */
+    public function createApplication()
+    {
+        $app = require __DIR__.'/../bootstrap/app.php';
+
+        $app->make(Kernel::class)->bootstrap();
+
+        return $app;
+    }
+}
