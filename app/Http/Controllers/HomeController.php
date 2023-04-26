@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Product;
 use App\Models\Cart;
+use App\Models\Wishlist;
 use App\Models\Order;
 use Session;
 use Stripe;
@@ -23,7 +24,21 @@ class HomeController extends Controller
     public function redirect(){
         $usertype = Auth::user()->usertype;
         if($usertype=='1'){
-            return view('admin.home');    
+            $total_product=product::all()->count();
+            $total_order=order::all()->count();
+            $total_user=user::all()->count();
+            $order=order::all();
+            $total_revenue=0;
+
+            foreach($order as $order){
+                $total_revenue= $total_revenue+$order->price;
+
+            }
+
+            $total_delivered=order::where('delivery_status', '=', 'delivered')->get()->count();
+            $total_processing=order::where('delivery_status', '=', 'processing')->get()->count();
+
+            return view('admin.home', compact('total_product','total_order','total_user', 'total_revenue', 'total_delivered', 'total_processing'));    
         }
         else{
             $product=Product::paginate(10);
@@ -42,29 +57,52 @@ class HomeController extends Controller
     public function add_cart(Request $request, $id){
         if(Auth::id()){
             $user=Auth::user();
+            $userid=$user->id;
             $product=product::find($id);
-            $cart=new cart;
-            $cart->name=$user->name;
-            $cart->email=$user->email;
-            $cart->phone=$user->phone;
-            $cart->address=$user->address;
-            $cart->user_id=$user->id;
-            $cart->product_title=$product->title;
+            $product_exist_id=cart::where('product_id', '=',$id)->where('user_id','=',$userid)->get('id')->first();
 
-            if($product->discount_price!=null){
-                $cart->price=$product->discount_price * $request->quantity;
+            if($product_exist_id){
+                $cart=cart::find($product_exist_id)->first();
+                $quantity=$cart->quantity;
+                $cart->quantity=$quantity+$request->quantity;
+                if($product->discount_price!=null){
+                    $cart->price=$product->discount_price * $cart->quantity;
+    
+                }
+                else{
+                    $cart->price=$product->price * $cart->quantity;
+                }
+                $cart->save();
+                return redirect()->back()->with('message','Product added successfully');
 
             }
             else{
-                $cart->price=$product->price * $request->quantity;
-            }
-            
-            $cart->product_id=$product->id;
-            $cart->image=$product->image;
-            $cart->quantity=$request->quantity;
+                $cart=new cart;
+                $cart->name=$user->name;
+                $cart->email=$user->email;
+                $cart->phone=$user->phone;
+                $cart->address=$user->address;
+                $cart->user_id=$user->id;
+                $cart->product_title=$product->title;
+    
+                if($product->discount_price!=null){
+                    $cart->price=$product->discount_price * $request->quantity;
+    
+                }
+                else{
+                    $cart->price=$product->price * $request->quantity;
+                }
+                
+                $cart->product_id=$product->id;
+                $cart->image=$product->image;
+                $cart->quantity=$request->quantity;
+    
+                $cart->save();
+                return redirect()->back()->with('message','Product added successfully');
 
-            $cart->save();
-            return redirect()->back();
+            }
+
+
 
         }
 
@@ -170,6 +208,125 @@ class HomeController extends Controller
               
         return back();
     }
+
+    public function show_order(){
+        if(Auth::id()){
+            $user=Auth::user();
+            $userid=$user->id;
+            $order=order::where('user_id', '=', $userid)->get();
+            return view('home.order', compact('order'));
+        }
+        else{
+            return redirect('login');
+        }
+
+    }
+
+    public function cancel_order($id){
+        $order=order::find($id);
+        $order->delivery_status='You canceled the order';
+        $order->save();
+        return redirect()->back();
+
+    }
+
+    public function product_search(Request $request){
+        $search_text = $request->search;
+        $product=product::where('title','LIKE',"%$search_text%")->orWhere('catagory','LIKE',"%$search_text%")->paginate(10);
+        return view('home.userpage', compact('product'));
+
+    }
+
+    public function products(){
+        $product=Product::paginate(10);
+        return view('home.all_product', compact('product'));
+    }
+
+    public function search_product(Request $request){
+        $search_text = $request->search;
+        $product=product::where('title','LIKE',"%$search_text%")->orWhere('catagory','LIKE',"%$search_text%")->paginate(10);
+        return view('home.all_product', compact('product'));
+
+
+    }
+
+    #<!--Add to Wishlist-->
+
+    public function add_wishlist(Request $request, $id){
+        if(Auth::id()){
+            $user=Auth::user();
+            $userid=$user->id;
+            $product=product::find($id);
+            $product_exist_id=wishlist::where('product_id', '=',$id)->where('user_id','=',$userid)->get('id')->first();
+
+            if($product_exist_id){
+                $wishlist=wishlist::find($product_exist_id)->first();
+                $quantity=$wishlist->quantity;
+                $wishlist->quantity=$quantity+$request->quantity;
+                if($product->discount_price!=null){
+                    $wishlist->price=$product->discount_price * $wishlist->quantity;
+    
+                }
+                else{
+                    $wishlist->price=$product->price * $wishlist->quantity;
+                }
+                $wishlist->save();
+                return redirect()->back()->with('message','Product added successfully');
+
+            }
+            else{
+                $wishlist=new wishlist;
+                $wishlist->name=$user->name;
+                $wishlist->email=$user->email;
+                $wishlist->phone=$user->phone;
+                $wishlist->address=$user->address;
+                $wishlist->user_id=$user->id;
+                $wishlist->product_title=$product->title;
+    
+                if($product->discount_price!=null){
+                    $wishlist->price=$product->discount_price * $request->quantity;
+    
+                }
+                else{
+                    $wishlist->price=$product->price * $request->quantity;
+                }
+                
+                $wishlist->product_id=$product->id;
+                $wishlist->image=$product->image;
+                $wishlist->quantity=$request->quantity;
+    
+                $wishlist->save();
+                return redirect()->back()->with('message','Product added successfully');
+
+            }
+
+
+
+        }
+
+        else{
+            return redirect('login');
+        }
+    }
+
+    public function show_wishlist(){
+        if(Auth::id()){
+            $id=Auth::user()->id;
+        $wishlist=wishlist::where('user_id', '=', $id)->get();
+        return view('home.show_wishlist', compact('wishlist'));
+
+        }
+        else{
+            return redirect('login');
+        }
+    }
+
+    public function remove_wishlist($id){
+        $wishlist=wishlist::find($id);
+        $wishlist->delete();
+        return redirect()->back();
+    }
+
 
 
 }

@@ -1,12 +1,10 @@
 <section class="product_section layout_padding">
     <div class="container">
        <div class="heading_container heading_center">
-          <h2>
-             Our <span>products</span>
-          </h2>
-          <br><br>
+       
+          
           <div>
-            <form action="{{ url('product_search') }}" method="GET">
+            <form action="{{ url('search_product') }}" method="GET">
                @csrf
                <input style="width:500px;" type="text" name="search" placeholder="Search for product" >
                <input type="submit" value="search">
@@ -15,13 +13,13 @@
        </div>
        @if (session()->has('message'))
 
-                <div class="alert alert-success">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
-                    {{ session()->get('message') }}
+       <div class="alert alert-success">
+           <button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+           {{ session()->get('message') }}
 
-                </div>
+       </div>
 
-                @endif
+       @endif
        <div class="row">
          @foreach ($product as $products )
             
@@ -48,8 +46,8 @@
                      </div>
                      </div>
                       </form>
-                      
-                      <!--Add to Wishlist-->
+
+                        <!--Add to Wishlist-->
                       <form action="{{ url('add_wishlist', $products->id) }}" method="Post">
                         @csrf
                         <div class="row">

@@ -20,6 +20,35 @@
       <link href="{{ asset('home/css/style.css') }}" rel="stylesheet" />
       <!-- responsive style -->
       <link href="{{ asset('home/css/responsive.css') }}" rel="stylesheet" />
+
+      <style type="text/css">
+      .center{
+        margin: auto;
+        width:70%;
+        text-align: center;
+        padding: 30px;
+      }
+      table,th,td{
+        border: 1px solid grey;
+      }
+
+      .th_deg{
+        font-size: 30px;
+        padding: 5px;
+        background: green;
+      }
+
+      .img_deg{
+        height: 200px;
+        width: 200px;
+      }
+
+      .total_deg{
+        font-size: 20px;
+        padding: 40px;
+      }
+    
+    </style>
    </head>
    <body>
       <div class="hero_area">
@@ -27,33 +56,65 @@
          @include('home.header')
          <!-- end header section -->
          <!-- slider section -->
-         @include('home.slider')
+         
          <!-- end slider section -->
+
+         @if (session()->has('message'))
+
+         <div class="alert alert-success">
+             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+             {{ session()->get('message') }}
+
+         </div>
+
+         @endif
+      
+      <div class="center">
+
+      <table>
+        <tr>
+            <th class="th_deg">Product title</th>
+            <th class="th_deg">Product quantity</th>
+            <th class="th_deg">Price</th>
+            <th class="th_deg">Image</th>
+            <th class="th_deg">Action</th>
+        </tr>
+        <?php $totalprice=0; ?> 
+        
+        @foreach ($wishlist as $wishlist)
+            
+       
+        <tr>
+            <td>{{ $wishlist->product_title }}</td>
+            <td>{{ $wishlist->quantity }}</td>
+            <td>${{ $wishlist->price }}</td>
+            <td><img class="img_deg" src="/product/{{ $wishlist->image }}" alt=""></td>
+            <td><a class="btn btn-danger" onclick="return confirm('Are you sure?')" href="{{ url('remove_wishlist', $wishlist->id) }}">Remove</a></td>
+            
+
+        </tr>
+
+        <?php $totalprice=$totalprice + $wishlist->price ?>
+
+        
+
+        @endforeach
+
+      </table>
+      <div>
+        <h1 class="total_deg">Total Price: ${{ $totalprice }}</h1>
       </div>
-      <!-- why section -->
-      @include('home.whyus')
-      
-      <!-- end why section -->
-      
-      <!-- arrival section -->
-      
+      <div>
+        
+        
+        
+      </div>
+    </div>
 
-      <!-- end arrival section -->
+
+    
+   
       
-      <!-- product section -->
-      @include('home.product')
-      <!-- end product section -->
-
-      <!-- subscribe section -->
-
- 
-      <!-- end subscribe section -->
-      <!-- client section -->
-      @include('home.client')
-
-      <!-- end client section -->
-      <!-- footer start -->
-      @include('home.footer')
 
       <!-- footer end -->
       <div class="cpy_">
@@ -63,18 +124,6 @@
          
          </p>
       </div>
-
-      <script>
-         document.addEventListener("DOMContentLoaded", function(event) { 
-             var scrollpos = localStorage.getItem('scrollpos');
-             if (scrollpos) window.scrollTo(0, scrollpos);
-         });
- 
-         window.onbeforeunload = function(e) {
-             localStorage.setItem('scrollpos', window.scrollY);
-         };
-     </script>
-
       <!-- jQery -->
       <script src="home/js/jquery-3.4.1.min.js"></script>
       <!-- popper js -->

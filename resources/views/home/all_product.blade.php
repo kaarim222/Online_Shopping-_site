@@ -27,30 +27,16 @@
          @include('home.header')
          <!-- end header section -->
          <!-- slider section -->
-         @include('home.slider')
-         <!-- end slider section -->
-      </div>
-      <!-- why section -->
-      @include('home.whyus')
-      
-      <!-- end why section -->
-      
-      <!-- arrival section -->
-      
+        
 
       <!-- end arrival section -->
       
       <!-- product section -->
-      @include('home.product')
+      @include('home.product_view')
       <!-- end product section -->
 
       <!-- subscribe section -->
-
- 
-      <!-- end subscribe section -->
-      <!-- client section -->
-      @include('home.client')
-
+     
       <!-- end client section -->
       <!-- footer start -->
       @include('home.footer')
@@ -74,7 +60,7 @@
              localStorage.setItem('scrollpos', window.scrollY);
          };
      </script>
-
+     
       <!-- jQery -->
       <script src="home/js/jquery-3.4.1.min.js"></script>
       <!-- popper js -->

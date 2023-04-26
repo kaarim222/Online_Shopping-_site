@@ -50,6 +50,8 @@ route::get('/product_details/{id}',[HomeController::class, 'product_details']);
 
 route::post('/add_cart/{id}',[HomeController::class, 'add_cart']);
 
+route::post('/add_wishlist/{id}',[HomeController::class, 'add_wishlist']);
+
 route::get('/show_cart',[HomeController::class, 'show_cart']);
 
 route::get('/remove_cart/{id}',[HomeController::class, 'remove_cart']);
@@ -66,5 +68,22 @@ route::get('/delivered/{id}',[AdminController::class, 'delivered']);
 
 route::get('/print_pdf/{id}',[AdminController::class, 'print_pdf']);
 
+route::get('/search',[AdminController::class, 'searchdata']);
+
+route::get('/show_order',[HomeController::class, 'show_order']);
+
+route::get('/cancel_order/{id}',[HomeController::class, 'cancel_order']);
+
+route::get('/product_search',[HomeController::class, 'product_search']);
+
+route::get('/products',[HomeController::class, 'products']);
+
+#Wishlist
+
+route::get('/search_product',[HomeController::class, 'search_product']);
+
+route::get('/show_wishlist',[HomeController::class, 'show_wishlist']);
+
+route::get('/remove_wishlist/{id}',[HomeController::class, 'remove_wishlist']);
 
 
