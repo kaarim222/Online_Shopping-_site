@@ -4,34 +4,31 @@
 
     @include('admin.css')
     <!-- Required meta tags -->
-    <style type="text/css">
+    <style>
+        .title_deg{
+            text-align: center;
+            font-size: 25px;
+            font-weight: bold;
+            padding-bottom: 50px;
+        }
 
-    .div_center{
-        text-align: center;
-        padding-top: 40px;
-    }
+        .table_deg{
+            border: 2px solid white;
+            width: 100%;
+            margin: auto;
+            
+            text-align: center;
 
-    .font_size{
-        font-size: 40px;
-        padding-bottom: 40px;
-    }
+        }
 
-    .text_color{
-        color: black;
-        padding-bottom: 20px;
-    }
+        .th_deg{
+            background-color:  skyblue;
+        }
 
-    label
-    {
-        display: inline-block;
-        width: 200px;
-
-    }
-
-    .div_design{
-        padding-bottom: 15px;
-    }
-
+        .image_size{
+            width: 200px;
+            height: 100px;
+        }
     </style>
 
   </head>
@@ -41,84 +38,67 @@
       @include('admin.sidebar')
       <!-- partial -->
       @include('admin.header')
-        <!-- partial -->
-        <div class="main-panel">
-            <div class="content-wrapper">
+      <div class="main-panel">
+        <div class="content-wrapper">
 
-                @if (session()->has('message'))
+            <h1 class="title_deg">All orders</h1>
 
-                <div class="alert alert-success">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
-                    {{ session()->get('message') }}
+            <table class="table_deg">
+                <tr class="th_deg">
+                    <th style="padding: 10px;">Name</th>
+                    <th style="padding: 10px;">Email</th>
+                    <th style="padding: 10px;">Address</th>
+                    <th style="padding: 10px;">Phone</th>
+                    <th style="padding: 10px;">Product title</th>
+                    <th style="padding: 10px;">Quantity</th>
+                    <th style="padding: 10px;">Price</th>
+                    <th style="padding: 10px;">Payment Status</th>
+                    <th style="padding: 10px;">Delivery Status</th>
+                    <th style="padding: 10px;">Image</th>
+                    <th style="padding: 10px;">Delivered</th>
+                    <th style="padding: 10px;">Print PDF</th>
 
-                </div>
+                </tr>
 
-                @endif
+                @foreach ($order as $order)
+                    
+                
+                <tr>
+                   <td>{{ $order->name }}</td> 
+                   <td>{{ $order->email }}</td> 
+                   <td>{{ $order->address }}</td> 
+                   <td>{{ $order->phone }}</td> 
+                   <td>{{ $order->product_title }}</td> 
+                   <td>{{ $order->quantity }}</td> 
+                   <td>{{ $order->price }}</td> 
+                   <td>{{ $order->payment_status }}</td> 
+                   <td>{{ $order->delivery_status }}</td> 
+                   <td><img class="image_size" src="/product/{{ $order->image }}" alt=""></td> 
+                   <td>
 
-                <div class="div_center">
-                    <h1 class="font_size">Add Product</h1>
+                    @if ($order->delivery_status=='processing')
+                        
+                    
+                    <a href="{{ url('delivered', $order->id) }}" onclick="return confirm ('Are you sure?')" class="btn btn-primary">Delivered</a>
 
-                    <form action="{{ url('/add_product') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
+                    @else
+                    <p style="color: green;">Delivered</p>
 
-                    <div class="div_design">
+                    @endif
+                
+                </td>
+                <td>
+                    <a href="{{ url('print_pdf', $order->id) }}" class="btn btn-secondary">Print PDF</a>
+                </td>
+                </tr>
 
-                    <label>Product Title</label>
-                    <input class="text_color" type="text" name="title" placeholder="Write a title" required="">
-                    </div>
+                @endforeach
+            </table>
 
-                    <div class="div_design">
-                        <label>Product Description:</label>
-                        <input class="text_color" type="text" name="description" placeholder="Write a description" required="">
-                        </div>
-
-                        <div class="div_design">
-                            <label>Product Price:</label>
-                            <input class="text_color" type="number" name="price" placeholder="Write a price" required="">
-                            </div>
-
-                            <div class="div_design">
-                                <label>Discount Price:</label>
-                                <input class="text_color" type="number" name="dis_price" placeholder="Write a discount if applicable">
-                                </div>
-
-                            <div class="div_design">
-                                <label>Product Quantity</label>
-                                <input class="text_color" type="number" min="0" name="quantity" placeholder="Write a quantity" required="">
-                                </div>
-
-                             
-
-                                    <div class="div_design">
-                                        <label>Product Catagory</label>
-                                        <select class="text_color" name="catagory" required="">
-                                            <option value="" selected="">Add a Catagory Here</option>
-
-                                            @foreach ($catagory as $catagory)
-                                                
-                                            
-                                            <option value="{{ $catagory->catagory_name }}">{{ $catagory->catagory_name }}</option>
-                                            @endforeach
-
-                                        </select>
-                                        </div>
-
-                                        <div class="div_design">
-                                            <label>Product Image Here</label>
-                                            <input type="file" name="image" required="">
-                                            </div>
-
-                                            <div class="div_design">
-                                                
-                                                <input type="submit" value="Add Product" class="btn btn-primary">
-                                                </div>
-
-                                            </form>
-
-                </div>
-
-            </div>
         </div>
+      </div>
+        <!-- partial -->
+
     
     <!-- container-scroller -->
     <!-- plugins:js -->

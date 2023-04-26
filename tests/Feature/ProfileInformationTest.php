@@ -4,33 +4,42 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Jetstream\Http\Livewire\UpdateProfileInformationForm;
-use Livewire\Livewire;
+use Laravel\Jetstream\Features;
 use Tests\TestCase;
 
-class ProfileInformationTest extends TestCase
+class PasswordConfirmationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_current_profile_information_is_available()
+    public function test_confirm_password_screen_can_be_rendered()
     {
-        $this->actingAs($user = User::factory()->create());
+        $user = User::factory()->withPersonalTeam()->create();
 
-        $component = Livewire::test(UpdateProfileInformationForm::class);
+        $response = $this->actingAs($user)->get('/user/confirm-password');
 
-        $this->assertEquals($user->name, $component->state['name']);
-        $this->assertEquals($user->email, $component->state['email']);
+        $response->assertStatus(200);
     }
 
-    public function test_profile_information_can_be_updated()
+    public function test_password_can_be_confirmed()
     {
-        $this->actingAs($user = User::factory()->create());
+        $user = User::factory()->create();
 
-        Livewire::test(UpdateProfileInformationForm::class)
-                ->set('state', ['name' => 'Test Name', 'email' => 'test@example.com'])
-                ->call('updateProfileInformation');
+        $response = $this->actingAs($user)->post('/user/confirm-password', [
+            'password' => 'password',
+        ]);
 
-        $this->assertEquals('Test Name', $user->fresh()->name);
-        $this->assertEquals('test@example.com', $user->fresh()->email);
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+    }
+
+    public function test_password_is_not_confirmed_with_invalid_password()
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post('/user/confirm-password', [
+            'password' => 'wrong-password',
+        ]);
+
+        $response->assertSessionHasErrors();
     }
 }

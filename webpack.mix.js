@@ -1,17 +1,18 @@
-const mix = require('laravel-mix');
+<?php
 
-/*
- |--------------------------------------------------------------------------
- | Mix Asset Management
- |--------------------------------------------------------------------------
- |
- | Mix provides a clean, fluent API for defining some Webpack build steps
- | for your Laravel applications. By default, we are compiling the CSS
- | file for the application as well as bundling up all the JS files.
- |
- */
+namespace Tests\Unit;
 
-mix.js('resources/js/app.js', 'public/js')
-    .postCss('resources/css/app.css', 'public/css', [
-        //
-    ]);
+use PHPUnit\Framework\TestCase;
+
+class ExampleTest extends TestCase
+{
+    /**
+     * A basic test example.
+     *
+     * @return void
+     */
+    public function test_example()
+    {
+        $this->assertTrue(true);
+    }
+}

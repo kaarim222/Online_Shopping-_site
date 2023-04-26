@@ -1,21 +1,19 @@
 <?php
 
-/**
- * Laravel - A PHP Framework For Web Artisans
- *
- * @package  Laravel
- * @author   Taylor Otwell <taylor@laravel.com>
- */
+use Illuminate\Foundation\Inspiring;
+use Illuminate\Support\Facades\Artisan;
 
-$uri = urldecode(
-    parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? ''
-);
+/*
+|--------------------------------------------------------------------------
+| Console Routes
+|--------------------------------------------------------------------------
+|
+| This file is where you may define all of your Closure based console
+| commands. Each Closure is bound to a command instance allowing a
+| simple approach to interacting with each command's IO methods.
+|
+*/
 
-// This file allows us to emulate Apache's "mod_rewrite" functionality from the
-// built-in PHP web server. This provides a convenient way to test a Laravel
-// application without having installed a "real" web server software here.
-if ($uri !== '/' && file_exists(__DIR__.'/public'.$uri)) {
-    return false;
-}
-
-require_once __DIR__.'/public/index.php';
+Artisan::command('inspire', function () {
+    $this->comment(Inspiring::quote());
+})->purpose('Display an inspiring quote');

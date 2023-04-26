@@ -4,54 +4,67 @@
             <x-jet-authentication-card-logo />
         </x-slot>
 
-        <div x-data="{ recovery: false }">
-            <div class="mb-4 text-sm text-gray-600" x-show="! recovery">
-                {{ __('Please confirm access to your account by entering the authentication code provided by your authenticator application.') }}
+        <x-jet-validation-errors class="mb-4" />
+
+        <form method="POST" action="{{ route('register') }}">
+            @csrf
+
+            <div>
+                <x-jet-label for="name" value="{{ __('Name') }}" />
+                <x-jet-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
             </div>
 
-            <div class="mb-4 text-sm text-gray-600" x-show="recovery">
-                {{ __('Please confirm access to your account by entering one of your emergency recovery codes.') }}
+            <div class="mt-4">
+                <x-jet-label for="email" value="{{ __('Email') }}" />
+                <x-jet-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required />
             </div>
 
-            <x-jet-validation-errors class="mb-4" />
+            <div class="mt-4">
+                <x-jet-label for="phone" value="{{ __('Phone') }}" />
+                <x-jet-input id="phone" class="block mt-1 w-full" type="number" name="phone" :value="old('phone')" required />
+            </div>
 
-            <form method="POST" action="{{ route('two-factor.login') }}">
-                @csrf
+            <div class="mt-4">
+                <x-jet-label for="address" value="{{ __('Address') }}" />
+                <x-jet-input id="address" class="block mt-1 w-full" type="text" name="address" :value="old('address')" required />
+            </div>
 
-                <div class="mt-4" x-show="! recovery">
-                    <x-jet-label for="code" value="{{ __('Code') }}" />
-                    <x-jet-input id="code" class="block mt-1 w-full" type="text" inputmode="numeric" name="code" autofocus x-ref="code" autocomplete="one-time-code" />
+            <div class="mt-4">
+                <x-jet-label for="password" value="{{ __('Password') }}" />
+                <x-jet-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
+            </div>
+
+            <div class="mt-4">
+                <x-jet-label for="password_confirmation" value="{{ __('Confirm Password') }}" />
+                <x-jet-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation" required autocomplete="new-password" />
+            </div>
+
+            @if (Laravel\Jetstream\Jetstream::hasTermsAndPrivacyPolicyFeature())
+                <div class="mt-4">
+                    <x-jet-label for="terms">
+                        <div class="flex items-center">
+                            <x-jet-checkbox name="terms" id="terms"/>
+
+                            <div class="ml-2">
+                                {!! __('I agree to the :terms_of_service and :privacy_policy', [
+                                        'terms_of_service' => '<a target="_blank" href="'.route('terms.show').'" class="underline text-sm text-gray-600 hover:text-gray-900">'.__('Terms of Service').'</a>',
+                                        'privacy_policy' => '<a target="_blank" href="'.route('policy.show').'" class="underline text-sm text-gray-600 hover:text-gray-900">'.__('Privacy Policy').'</a>',
+                                ]) !!}
+                            </div>
+                        </div>
+                    </x-jet-label>
                 </div>
+            @endif
 
-                <div class="mt-4" x-show="recovery">
-                    <x-jet-label for="recovery_code" value="{{ __('Recovery Code') }}" />
-                    <x-jet-input id="recovery_code" class="block mt-1 w-full" type="text" name="recovery_code" x-ref="recovery_code" autocomplete="one-time-code" />
-                </div>
+            <div class="flex items-center justify-end mt-4">
+                <a class="underline text-sm text-gray-600 hover:text-gray-900" href="{{ route('login') }}">
+                    {{ __('Already registered?') }}
+                </a>
 
-                <div class="flex items-center justify-end mt-4">
-                    <button type="button" class="text-sm text-gray-600 hover:text-gray-900 underline cursor-pointer"
-                                    x-show="! recovery"
-                                    x-on:click="
-                                        recovery = true;
-                                        $nextTick(() => { $refs.recovery_code.focus() })
-                                    ">
-                        {{ __('Use a recovery code') }}
-                    </button>
-
-                    <button type="button" class="text-sm text-gray-600 hover:text-gray-900 underline cursor-pointer"
-                                    x-show="recovery"
-                                    x-on:click="
-                                        recovery = false;
-                                        $nextTick(() => { $refs.code.focus() })
-                                    ">
-                        {{ __('Use an authentication code') }}
-                    </button>
-
-                    <x-jet-button class="ml-4">
-                        {{ __('Log in') }}
-                    </x-jet-button>
-                </div>
-            </form>
-        </div>
+                <x-jet-button class="ml-4">
+                    {{ __('Register') }}
+                </x-jet-button>
+            </div>
+        </form>
     </x-jet-authentication-card>
 </x-guest-layout>

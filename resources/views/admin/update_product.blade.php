@@ -1,36 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <base href="/public">
 
     @include('admin.css')
     <!-- Required meta tags -->
     <style type="text/css">
-
-    .div_center{
+    .center{
+        margin: auto;
+        width: 50%;
+        border: 2px solid white;
         text-align: center;
-        padding-top: 40px;
+        margin-top: 40px;
+
     }
 
     .font_size{
+        text-align: center;
         font-size: 40px;
-        padding-bottom: 40px;
+        padding-top: 20px;
     }
 
-    .text_color{
-        color: black;
-        padding-bottom: 20px;
+    .image_size{
+        width: 150px;
+        height: 150px;
     }
 
-    label
-    {
-        display: inline-block;
-        width: 200px;
-
+    .th_color{
+        background: skyblue;
     }
 
-    .div_design{
-        padding-bottom: 15px;
+    .th_deg{
+        padding: 30px;
     }
 
     </style>
@@ -56,78 +56,50 @@
 
                 @endif
 
-                <div class="div_center">
-                    <h1 class="font_size">Update Product</h1>
+                <h2 class="font_size">All Products</h2>
 
-                    <form action="{{ url('/update_product_confirm', $product->id) }}" method="POST" enctype="multipart/form-data">
-                        @csrf
+                <table class="center">
+                    <tr class="th_color">
+                        <th class="th_deg">Product title</th>
+                        <th class="th_deg">Description</th>
+                        <th class="th_deg">Quantity</th>
+                        <th class="th_deg">Catagory</th>
+                        <th class="th_deg">Price</th>
+                        <th class="th_deg">Discount Price</th>
+                        <th class="th_deg">Product Image</th>
+                        <th class="th_deg">Delete</th>
+                        <th class="th_deg">Edit</th>
+                        
+                    </tr>
 
-                    <div class="div_design">
+                    @foreach ($product as $product)
+                        
+                    
+                    <tr>
+                        <td>{{ $product->title }}</td>
+                        <td>{{ $product->description }}</td>
+                        <td>{{ $product->quantity }}</td>
+                        <td>{{ $product->catagory }}</td>
+                        <td>{{ $product->price }}</td>
+                        <td>{{ $product->discount_price }}</td>
+                        <td>
+                            <img class="image_size" src="/product/{{ $product->image }}">
+                        </td>
 
-                    <label>Product Title</label>
-                    <input class="text_color" type="text" name="title" placeholder="Write a title" required="" value="{{ $product->title }}">
-                    </div>
+                        <td>
+                            <a class="btn btn-danger" onclick="return confirm('Are you sure?')" href="{{ url('delete_product', $product->id) }}">Delete</a>
+                        </td>
+                        <td>
+                          <a class="btn btn-success" href="{{ url('update_product', $product->id) }}">Edit</a>  
+                        </td>
 
-                    <div class="div_design">
-                        <label>Product Description:</label>
-                        <input class="text_color" type="text" name="description" placeholder="Write a description" required="" value="{{ $product->description }}">
-                        </div>
+                    </tr>
 
-                        <div class="div_design">
-                            <label>Product Price:</label>
-                            <input class="text_color" type="number" name="price" placeholder="Write a price" required="" value="{{ $product->price }}">
-                            </div>
+                    @endforeach
 
-                            <div class="div_design">
-                                <label>Discount Price:</label>
-                                <input class="text_color" type="number" name="dis_price" placeholder="Write a discount if applicable" value="{{ $product->discount_price }}">
-                                </div>
-
-                            <div class="div_design">
-                                <label>Product Quantity</label>
-                                <input class="text_color" type="number" min="0" name="quantity" placeholder="Write a quantity" required="" value="{{ $product->quantity }}">
-                                </div>
-
-                             
-
-                                    <div class="div_design">
-                                        <label>Product Catagory</label>
-                                        <select class="text_color" name="catagory" required="">
-                                            <option value="{{ $product->catagory }}" selected="">{{ $product->catagory }}</option>
-
-                                            @foreach ($catagory as $catagory)
-                                                
-                                            
-                                            <option value="{{ $catagory->catagory_name }}">{{ $catagory->catagory_name }}</option>
-                                            @endforeach
-
-
-
-                                        </select>
-                                        </div>
-
-                                        <div class="div_design">
-                                            <label>Current Product Image</label>
-                                            <img style="margin: auto" height="100" width="100" src="/product/{{ $product->image }}" alt="">
-                                            </div>
-
-                                        <div class="div_design">
-                                            <label>Change Product Image</label>
-                                            <input type="file" name="image">
-                                            </div>
-
-                                            <div class="div_design">
-                                                
-                                                <input type="submit" value="Update Product" class="btn btn-primary">
-                                                </div>
-
-                                            </form>
-
-                </div>
-
+                </table>
             </div>
         </div>
-    
     <!-- container-scroller -->
     <!-- plugins:js -->
     @include('admin.script')

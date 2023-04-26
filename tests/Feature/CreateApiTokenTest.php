@@ -3,37 +3,43 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Jetstream\Features;
-use Laravel\Jetstream\Http\Livewire\ApiTokenManager;
-use Livewire\Livewire;
 use Tests\TestCase;
 
-class CreateApiTokenTest extends TestCase
+class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_api_tokens_can_be_created()
+    public function test_login_screen_can_be_rendered()
     {
-        if (! Features::hasApiFeatures()) {
-            return $this->markTestSkipped('API support is not enabled.');
-        }
+        $response = $this->get('/login');
 
-        $this->actingAs($user = User::factory()->withPersonalTeam()->create());
+        $response->assertStatus(200);
+    }
 
-        Livewire::test(ApiTokenManager::class)
-                    ->set(['createApiTokenForm' => [
-                        'name' => 'Test Token',
-                        'permissions' => [
-                            'read',
-                            'update',
-                        ],
-                    ]])
-                    ->call('createApiToken');
+    public function test_users_can_authenticate_using_the_login_screen()
+    {
+        $user = User::factory()->create();
 
-        $this->assertCount(1, $user->fresh()->tokens);
-        $this->assertEquals('Test Token', $user->fresh()->tokens->first()->name);
-        $this->assertTrue($user->fresh()->tokens->first()->can('read'));
-        $this->assertFalse($user->fresh()->tokens->first()->can('delete'));
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(RouteServiceProvider::HOME);
+    }
+
+    public function test_users_can_not_authenticate_with_invalid_password()
+    {
+        $user = User::factory()->create();
+
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'wrong-password',
+        ]);
+
+        $this->assertGuest();
     }
 }
